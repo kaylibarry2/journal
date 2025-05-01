@@ -1,0 +1,83 @@
+import tkinter as tk
+import math
+import os
+import requests
+
+
+
+url = os.environ['URL']
+token = os.environ['TOKEN']
+
+def button_clicked(button, month):
+
+    popup = tk.Toplevel()
+    popup.title("Journal")
+    popup.configure(background="powderblue", cursor="heart blue")
+    popup.iconbitmap("book.ico")
+    popup.geometry("600x250")
+
+    popup.grid_rowconfigure(2, weight=1)
+    popup.grid_columnconfigure(0, weight=1)
+    popup.geometry("600x250+770+426")
+
+    # flowers
+    canvas = tk.Canvas(popup, width=600, height=250, bg="powderblue")
+    canvas.place(x=0, y=0)
+
+    def draw_flower(center_x, center_y,s_color,p_color):
+        # Draw center
+        canvas.create_oval(center_x - 10, center_y - 10, center_x + 10, center_y + 10, fill="yellow", outline="")
+
+        # Draw stem
+        canvas.create_rectangle(center_x - 3, center_y + 10, center_x + 3, center_y + 60, fill=f"{s_color}", outline="")
+
+        # Draw petals
+        num_petals = 8
+        radius = 20  # Distance from center
+        petal_radius = 20  # Petal size
+
+        for i in range(num_petals):
+            angle = (i * 2 * math.pi) / num_petals
+            x1 = center_x + radius * math.cos(angle) - petal_radius // 2
+            y1 = center_y + radius * math.sin(angle) - petal_radius // 2
+            x2 = x1 + petal_radius
+            y2 = y1 + petal_radius
+
+            canvas.create_oval(x1, y1, x2, y2, fill=f"{p_color}", outline="")
+
+
+    # Draw flowers in corners
+    draw_flower(40, 30,"green", "pink")
+    draw_flower(550, 30,"green", "pink")
+    draw_flower(400, 40,"lightgreen", "aquamarine")
+
+
+
+
+    tk.Label(popup, text=f"{month} {button} entry", bg = "thistle1").place(relx = .45, rely = .1)
+
+    user_input = tk.Text(popup, bg="palegreen", width=65, height=8)
+    data = user_input.insert("1.0", "How was your day?")
+    user_input.place(relx = .5, rely =.6, anchor = "center")
+
+    s_button = tk.Button(popup, text="Finished!", bg = "lightseagreen",
+                         command= lambda: add_entry(user_input.get("1.0", "end"),month,button) )
+    s_button.place(relx = .46, rely = .8)
+
+
+def add_entry(data, month, day):
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    user_params = {
+        "sheet1" : {
+            "month" : month,
+            "day" : day,
+            "entry" : data
+        }
+    }
+
+    response = requests.post(url,json = user_params, headers=headers )
+
+    datas = response.json()
+    print(datas)
