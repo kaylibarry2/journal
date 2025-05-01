@@ -1,0 +1,94 @@
+
+import tkinter as tk
+from PIL import ImageTk, Image
+from datetime import datetime
+from entry import button_clicked
+
+
+window_width = 320
+window_height = 295
+
+root = tk.Tk()
+
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+x = (screen_width // 2) - (window_width // 2)
+y = (screen_height // 2) - (window_height //2)
+
+
+root.title("Journal")
+root.configure(background= "powderblue",cursor="heart blue")
+root.iconbitmap("book.ico")
+root.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
+
+# set up a greeting as well as a place to pick a date from a calendar that can take you to that entry
+# or make a new entry on that date
+img  = ImageTk.PhotoImage(Image.open("mm_cross.jpg"))
+cat_greeting = tk.Label(image = img, bg = "powderblue"
+                                          "")
+cat_greeting.grid(row = 0, column = 0, columnspan = 7)
+
+greeting = tk.Label(root, text= "Hi User! Hope you had a good day! Wanna tell me about it?",
+                    bg = "powderblue")
+greeting.grid(row=1, column=0, columnspan = 7,)
+month_w = datetime.now().strftime("%B")
+title = tk.Label(root, text = month_w, bg ="powderblue")
+title.grid(row=2, column = 0 , columnspan = 7)
+
+buttons = {}
+
+
+#create calender
+for i in range(35):
+    r = (min(i//7,5)) +3
+    c= i%7
+    button = tk.Button(root)
+    button.grid(row = r, column= c, sticky = "ew")
+    buttons[(r,c)] = button
+
+# sync calendar with real dates
+year = datetime.now().year
+month = datetime.now().month
+day = datetime(year,month, 1).strftime('%A')
+
+day_to_number = {
+    "Sunday": 0,
+    "Monday": 1,
+    "Tuesday": 2,
+    "Wednesday":3,
+    "Thursday":4,
+    "Friday":5,
+    "Saturday":6
+}
+change = day_to_number[day]
+
+
+last_day = ((datetime(year, month + 1 , 1 )) - datetime(year, month,1)).days
+
+
+# journal entries
+
+n = False
+x = 0
+
+for i in buttons:
+    if x >= last_day:
+        break
+    elif i == (3, change):
+        n = True
+    if n:
+        x += 1
+        buttons[i].config(text=x,
+                          command =lambda c=x,m=month_w: button_clicked(c,m))
+
+
+
+
+
+
+
+
+
+root.mainloop()
